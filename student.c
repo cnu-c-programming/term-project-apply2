@@ -9,9 +9,12 @@ void addStudent(Student** head, int id, char* name, int score) {
         fprintf(stderr, "Error: Memory allocation failed\n");
         return;
     };
-    
+    newStudent->id = id;
+    strcpy(newStudent->name, name, sizeof(newStudent->name) - 1);
+    newStudent->name[sizeof(newStudent->name) - 1] = '\0';
+    newStudent->score = score;
+    newStudent->next = NULL;
 }
-
 void listStudents(Student* head) {
 
 };
