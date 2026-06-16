@@ -17,12 +17,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 /* TODO: Add your own header includes here */
-/* #include "student.h"  */
-/* #include "file_io.h"  */
-/* #include "command.h"  */
+#include "student.h"
+#include "file_io.h"
+#include "command.h"
 
+char* globalfilename = NULL;
 /* ---------------------------------------------------------------
  * TODO: Implement the interactive shell loop.
  *   - Print a prompt and read a line from stdin.
@@ -30,6 +30,7 @@
  *   - Dispatch to the appropriate handler function.
  *   - Loop until the user types "exit" or EOF.
  * --------------------------------------------------------------- */
+ 
 void run_shell(const char *csv_path) {
     /* TODO */
     (void)csv_path;

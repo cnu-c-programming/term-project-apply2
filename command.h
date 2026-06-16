@@ -1,22 +1,22 @@
 #ifndef COMMAND_H
 #define COMMAND_H
-#include "command.h"
+#include "student.h"
 
 typedef enum {
     CMD_SUCCESS,
     CMD_ERROR,
     CMD_EXIT
-} ShellResult;
+} shellResult;
 
 typedef struct {
     const char* name;
     CommandHandler handler;
     const char* usage;
-    const char* description;
+    const char* des;
 } Command;
 
-typedef ShellResult (*CommandHandler)(char* args, Student** head);
+typedef shellResult (*CommandHandler)(char* args, Student** head);
 
-ShellResult process_command(char* input, Student** head);
+shellResult processingcommand(char* input, Student** head);
 
 #endif
