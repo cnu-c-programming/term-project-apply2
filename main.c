@@ -17,7 +17,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/* TODO: Add your own header includes here */
 #include "student.h"
 #include "file_io.h"
 #include "command.h"
@@ -32,10 +31,28 @@ char* globalfilename = NULL;
  * --------------------------------------------------------------- */
  
 void run_shell(const char *csv_path) {
-    /* TODO */
     (void)csv_path;
-}
+    Student* head;
+    char input;
+    ShellResult result = SHELL_OK;
 
+    #ifdef ADMIN_MODE
+        const char* prompt = "admin> ";
+    #else
+        const char* prompt = "client> ";
+    #endif
+    while (result != SHELL_EXIT) {
+        printf("%s", prompt);
+        if (fgets(input, sizeof(input), stdin) == NULL) break;
+        
+        input[strcspn(input, "\n")] = 0;
+        
+        if (strlen(input) > 0) {
+            result = process_command(input, &head);
+        }
+    }
+    freeStudents(head);
+}
 /* ---------------------------------------------------------------
  * TODO: Implement batch mode – read commands from a file.
  *   - Open cmd_file for reading.
@@ -43,15 +60,35 @@ void run_shell(const char *csv_path) {
  *   - Close the file when done.
  * --------------------------------------------------------------- */
 void run_command_file(const char *cmd_file, const char *csv_path) {
-    /* TODO */
+    FILE* fp = fopen(cmd_file, "r");
+    if (!fp) {
+        perror("Error: could not open command file");
+        return;
+    }
+    Student* head;
     (void)cmd_file;
     (void)csv_path;
+
+    char input;
+    int line_num = 1;
+
+    while (fgets(input, sizeof(input), fp)) {
+        input[strcspn(input, "\n")] = 0;
+
+        printf("[command file:%d] %s\n", line_num++, input);
+        
+        if (process_command(input, &head) == SHELL_EXIT) {
+            break;
+        }
+    }
+    fclose(fp);
+    freeStudents(head);
 }
 
 int main(int argc, char *argv[]) {
     const char *csv_path  = "students.csv"; /* default CSV file */
     const char *cmd_file  = NULL;           /* -f <file> argument */
-
+    globalfilename = (char*)csv_path;
     /* TODO: Parse command-line arguments.
      *   Supported flags:
      *     -f <file>   run commands from <file> instead of stdin
@@ -67,6 +104,14 @@ int main(int argc, char *argv[]) {
      *       }
      *   }
      */
+     for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
+            cmd_file = argv[++i];
+        } else {
+            csv_path = argv[i];
+        }
+    }
+
     (void)argc;
     (void)argv;
 
