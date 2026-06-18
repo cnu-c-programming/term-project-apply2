@@ -8,3 +8,4 @@ rem
 rem Python 3.9+ 필요
 python "%~dp0grader.py" %*
 exit /b %ERRORLEVEL%
+ls

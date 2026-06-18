@@ -9,6 +9,18 @@ void addStudent(Student** head, int id, char* name, int score) {
         fprintf(stderr, "Error: Memory allocation failed\n");
         return;
     }
+    if (id <= 0) {
+        printf("Error: invalid ID\n");
+        return;
+    }
+    if (name == NULL || strlen(name) == 0) {
+        printf("Error: missing name\n");
+        return;
+    }
+    if (score < 0 || score > 100) {
+        printf("Error: invalid score\n");
+        return;
+    }
 
     newStudent->id = id;
     strncpy(newStudent->name, name, sizeof(newStudent->name) - 1);
@@ -46,9 +58,9 @@ void listStudents(Student* head) {
         return;
     }
 
-    printf("%5s %15s %5s\n", "ID", "Name", "Score");
+    printf("%-5s %-15s %-5s\n", "ID", "Name", "Score");
     while (temp != NULL) {
-        printf("%5d %15s %5d\n", temp->id, temp->name, temp->score);
+        printf("%-5d %-15s %-5d\n", temp->id, temp->name, temp->score);
         temp = temp->next;
     }
 }
