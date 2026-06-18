@@ -31,10 +31,11 @@ char* globalfilename = NULL;
  * --------------------------------------------------------------- */
  
 void run_shell(const char *csv_path) {
-    (void)csv_path;
-    Student* head;
-    char input;
+    Student* head = NULL;
+    char input[256];
     ShellResult result = SHELL_OK;
+    
+    loadStudent(csv_path, &head);
 
     #ifdef ADMIN_MODE
         const char* prompt = "admin> ";
@@ -65,11 +66,10 @@ void run_command_file(const char *cmd_file, const char *csv_path) {
         perror("Error: could not open command file");
         return;
     }
-    Student* head;
-    (void)cmd_file;
-    (void)csv_path;
+    Student* head = NULL;
+    loadStudent(csv_path, &head);   
 
-    char input;
+    char input[256];
     int line_num = 1;
 
     while (fgets(input, sizeof(input), fp)) {
@@ -88,7 +88,6 @@ void run_command_file(const char *cmd_file, const char *csv_path) {
 int main(int argc, char *argv[]) {
     const char *csv_path  = "students.csv"; /* default CSV file */
     const char *cmd_file  = NULL;           /* -f <file> argument */
-    globalfilename = (char*)csv_path;
     /* TODO: Parse command-line arguments.
      *   Supported flags:
      *     -f <file>   run commands from <file> instead of stdin
@@ -111,9 +110,7 @@ int main(int argc, char *argv[]) {
             csv_path = argv[i];
         }
     }
-
-    (void)argc;
-    (void)argv;
+     globalfilename = (char*)csv_path;
 
 #ifdef ADMIN_MODE
     /* Admin shell: supports add, delete, update, save, load, sort, list, find, help, exit */

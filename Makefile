@@ -2,7 +2,8 @@ CC     = gcc
 CFLAGS = -Wall -Wextra -std=c11
 
 # TODO: Add all your .c source files here (e.g., student.c file_io.c command.c)
-SRCS   = main.c student.c file_io.c command.c
+SRCS = main.c student.c file_io.c command.c
+HEADERS = student.h file_io.h command.h
 
 .PHONY: all admin client clean
 
