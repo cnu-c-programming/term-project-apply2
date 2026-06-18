@@ -1,0 +1,4 @@
+list
+update 99 70
+find 1
+exit

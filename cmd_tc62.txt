@@ -1,0 +1,5 @@
+
+list
+
+find 1
+exit
