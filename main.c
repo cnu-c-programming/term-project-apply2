@@ -82,6 +82,8 @@ void run_command_file(const char *cmd_file, Student** head) {
         result = process_command(input, head);
         if (result == SHELL_EXIT) {
             break;
+        } else if (result != SHELL_OK) {
+            printf("Skipped line %d\n", line_num - 1);
         }
     }
     fclose(fp);
@@ -92,24 +94,15 @@ void run_command_file(const char *cmd_file, Student** head) {
 }
 
 int main(int argc, char *argv[]) {
-    const char *csv_path  = "students.csv"; /* default CSV file */
-    const char *cmd_file  = NULL;           /* -f <file> argument */
-    /* TODO: Parse command-line arguments.
-     *   Supported flags:
-     *     -f <file>   run commands from <file> instead of stdin
-     *   Remaining positional argument (if any): path to students CSV.
-     *
-     *   Example parsing skeleton:
-     *
-     *   for (int i = 1; i < argc; i++) {
-     *       if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
-     *           cmd_file = argv[++i];
-     *       } else {
-     *           csv_path = argv[i];
-     *       }
-     *   }
-     */
-     for (int i = 1; i < argc; i++) {
+    const char *csv_path  = NULL;
+    const char *cmd_file  = NULL;
+
+    if (argc < 2) {
+        printf("Usage: %s [-f cmd_file] [students.csv]\n", argv[0]);
+        return 1;
+    }
+
+    for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-f") == 0) {
             if (i + 1 < argc) {
                 cmd_file = argv[++i];
@@ -121,10 +114,16 @@ int main(int argc, char *argv[]) {
             csv_path = argv[i];
         }
     }
-     globalfilename = (char*)csv_path;
+    if (csv_path == NULL) {
+        csv_path = "students.csv";
+    }
+    globalfilename = (char*)csv_path;
 
     Student* head = NULL;
-    loadStudent(csv_path, &head);
+    int loaded = loadStudent(csv_path, &head);
+    if (loaded >= 0) {
+        printf("Loaded %d students from %s.\n", loaded, csv_path);
+    }
 
 #ifdef ADMIN_MODE
     /* Admin shell: supports add, delete, update, save, load, sort, list, find, help, exit */

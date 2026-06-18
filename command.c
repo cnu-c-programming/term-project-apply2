@@ -23,7 +23,15 @@ ShellResult handle_find(char* args, Student** head) {
         printf("Error: missing ID.\n");
         return SHELL_ERR_MISSING_ARGUMENT;
     }
-    findStudent(*head, atoi(idStr));
+    int id = atoi(idStr);
+    Student* temp = *head;
+    int found = 0;
+    while(temp) { if(temp->id == id) { found = 1; break; } temp = temp->next; }
+    if (!found) {
+        printf("Error: student not found\n");
+        return SHELL_ERR_STUDENT_NOT_FOUND;
+    }
+    findStudent(*head, id);
     return SHELL_OK;
 }
 
@@ -67,7 +75,7 @@ ShellResult handle_sort(char* args, Student** head) {
     }
     if (strcmp(key, "name") != 0 && strcmp(key, "score") != 0) {
         printf("Error: invalid sort key\n");
-        return SHELL_OK;
+        return SHELL_ERR_INVALID_ARGUMENT;
     }
     if (*head == NULL || (*head)->next == NULL) {
         printf("sorted by %s\n", key);
@@ -120,6 +128,7 @@ ShellResult handle_clear(char* args, Student** head) {
 ShellResult handle_exit(char* args, Student** head) {
     printf("Goodbye.\n");
     freeStudents(*head);
+    *head = NULL;
     return SHELL_EXIT;
 }
 
@@ -137,7 +146,32 @@ ShellResult handle_add(char* args, Student** head) {
         printf("Error: missing arguments.\n");
         return SHELL_ERR_MISSING_ARGUMENT;
     }
-    addStudent(head, atoi(idStr), nameStr, atoi(scoreStr));
+    
+    int id = atoi(idStr);
+    if (id <= 0) {
+        printf("Error: invalid ID\n");
+        return SHELL_ERR_INVALID_ARGUMENT;
+    }
+    int score = atoi(scoreStr);
+    if (score == 0 && scoreStr[0] != '0') {
+        printf("Error: invalid score\n");
+        return SHELL_ERR_INVALID_SCORE;
+    }
+    if (score < 0 || score > 100) {
+        printf("Error: invalid score\n");
+        return SHELL_ERR_INVALID_SCORE;
+    }
+    
+    Student* temp = *head;
+    while(temp) {
+        if(temp->id == id) {
+            printf("Error: duplicate ID\n");
+            return SHELL_ERR_DUPLICATE_STUDENT;
+        }
+        temp = temp->next;
+    }
+
+    addStudent(head, id, nameStr, score);
     
     return SHELL_OK;
 }
@@ -148,7 +182,15 @@ ShellResult handle_delete(char* args, Student** head) {
         printf("Error: missing ID.\n");
         return SHELL_ERR_MISSING_ARGUMENT;
     }
-    deleteStudent(head, atoi(idStr));
+    int id = atoi(idStr);
+    Student* temp = *head;
+    int found = 0;
+    while(temp) { if(temp->id == id) { found = 1; break; } temp = temp->next; }
+    if (!found) {
+        printf("Error: student not found\n");
+        return SHELL_ERR_STUDENT_NOT_FOUND;
+    }
+    deleteStudent(head, id);
     return SHELL_OK;
 }
 
@@ -160,7 +202,27 @@ ShellResult handle_update(char* args, Student** head) {
         printf("Error: missing arguments.\n");
         return SHELL_ERR_MISSING_ARGUMENT;
     }
-    updateStudent(*head, atoi(idStr), atoi(scoreStr));
+    
+    int id = atoi(idStr);
+    int score = atoi(scoreStr);
+    if (score == 0 && scoreStr[0] != '0') {
+        printf("Error: invalid score\n");
+        return SHELL_ERR_INVALID_SCORE;
+    }
+    if (score < 0 || score > 100) {
+        printf("Error: invalid score\n");
+        return SHELL_ERR_INVALID_SCORE;
+    }
+    
+    Student* temp = *head;
+    int found = 0;
+    while(temp) { if(temp->id == id) { found = 1; break; } temp = temp->next; }
+    if (!found) {
+        printf("Error: student not found\n");
+        return SHELL_ERR_STUDENT_NOT_FOUND;
+    }
+
+    updateStudent(*head, id, score);
     return SHELL_OK;
 }
 
