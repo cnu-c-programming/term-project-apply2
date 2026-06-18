@@ -13,7 +13,6 @@
  *   ./client_shell [students.csv]
  *   ./client_shell -f commands.txt [students.csv]
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -114,6 +113,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef ADMIN_MODE
     /* Admin shell: supports add, delete, update, save, load, sort, list, find, help, exit */
+    printf("[Admin Program]\n");
     if (cmd_file) {
         run_command_file(cmd_file, csv_path);
     } else {
@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
 
 #elif defined(CLIENT_MODE)
     /* Client shell: supports find, list, help, exit  (read-only) */
+    printf("[Client Program]\n");
     if (cmd_file) {
         run_command_file(cmd_file, csv_path);
     } else {
