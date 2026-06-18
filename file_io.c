@@ -5,31 +5,38 @@
 
 int loadStudent(const char* filename, Student** head) {
     FILE* fp = fopen(filename, "r");
-    if(fp == NULL) {
-        perror("fopen");
-        return 0;
+    if (fp == NULL) {
+        return 0; // File does not exist, start with empty list
     }
+    
     char bf[256];
     int count = 0;
 
+    // Read header
     if (fgets(bf, sizeof(bf), fp) == NULL) {
         fclose(fp);
         return 0;
     }
     bf[strcspn(bf, "\r\n")] = '\0';
-    if (strcmp(bf, "id,name,score") != 0 && strcmp(bf, "id,name,score\r") != 0) {
+    if (strcmp(bf, "id,name,score") != 0) {
         printf("Error: invalid CSV header\n");
         fclose(fp);
         return -1;
     }
 
+    Student* tail = *head;
+    while (tail && tail->next) {
+        tail = tail->next;
+    }
+
     while (fgets(bf, sizeof(bf), fp) != NULL) {
         bf[strcspn(bf, "\r\n")] = '\0';
+        
         char* a = strtok(bf, ",");
         char* b = strtok(NULL, ",");
         char* c = strtok(NULL, ",");
 
-        if(a&&b&&c) {
+        if (a && b && c) {
             int id = atoi(a);
             int score = atoi(c);
 
@@ -43,12 +50,14 @@ int loadStudent(const char* filename, Student** head) {
 
                 if (*head == NULL) {
                     *head = newStudent;
+                    tail = newStudent;
                 } else {
-                    Student* temp = *head;
-                    while (temp->next != NULL) {
-                        temp = temp->next;
+                    if (!tail) {
+                        tail = *head;
+                        while (tail->next) tail = tail->next;
                     }
-                    temp->next = newStudent;
+                    tail->next = newStudent;
+                    tail = newStudent;
                 }
                 count++;
             }
@@ -56,7 +65,8 @@ int loadStudent(const char* filename, Student** head) {
     }
     fclose(fp);
     return count;
-};
+}
+
 int saveStudent(const char* filename, Student* head){
     FILE* fp = fopen(filename, "w");
     if (fp == NULL) {
@@ -69,10 +79,13 @@ int saveStudent(const char* filename, Student* head){
 
     Student* temp = head;
     while (temp != NULL) {
-        fprintf(fp, "%d,%s,%d\n", temp->id, temp->name, temp->score);
+        if (fprintf(fp, "%d,%s,%d\n", temp->id, temp->name, temp->score) < 0) {
+            fprintf(stderr, "Error: Failed to write to CSV\n");
+            break;
+        }
         count++;
         temp = temp->next;
     }
     fclose(fp);
     return count;
-};
+}
