@@ -16,7 +16,7 @@ int loadStudent(const char* filename, Student** head) {
         fclose(fp);
         return 0;
     }
-    while (fgests(bf, sizeof(bf), fp) != NULL) {
+    while (fgets(bf, sizeof(bf), fp) != NULL) {
         bf[strcspn(bf, "r\n")] = '\0';
         char* a = strtok(bf, ",");
         char* b = strtok(NULL, ",");

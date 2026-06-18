@@ -46,9 +46,9 @@ void listStudents(Student* head) {
         return;
     }
 
-    printf("% 5s % 15s % 5s\n", "ID", "Name", "Score");
+    printf("%5s %15s %5s\n", "ID", "Name", "Score");
     while (temp != NULL) {
-        printf("% 5d % 15s % 5d\n", temp->id, temp->name, temp->score);
+        printf("%5d %15s %5d\n", temp->id, temp->name, temp->score);
         temp = temp->next;
     }
 }

@@ -8,6 +8,7 @@
 extern char* globalfilename;
 
 ShellResult handle_list(char* args, Student** head) {
+    (void)args;
     if (*head == NULL) {
         printf("No students found.\n");
     } else {
