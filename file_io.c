@@ -16,8 +16,15 @@ int loadStudent(const char* filename, Student** head) {
         fclose(fp);
         return 0;
     }
+    bf[strcspn(bf, "\r\n")] = '\0';
+    if (strcmp(bf, "id,name,score") != 0 && strcmp(bf, "id,name,score\r") != 0) {
+        printf("Error: invalid CSV header\n");
+        fclose(fp);
+        return -1;
+    }
+
     while (fgets(bf, sizeof(bf), fp) != NULL) {
-        bf[strcspn(bf, "r\n")] = '\0';
+        bf[strcspn(bf, "\r\n")] = '\0';
         char* a = strtok(bf, ",");
         char* b = strtok(NULL, ",");
         char* c = strtok(NULL, ",");
@@ -26,8 +33,25 @@ int loadStudent(const char* filename, Student** head) {
             int id = atoi(a);
             int score = atoi(c);
 
-            addStudent(head, id, b, score);
-            count++;
+            Student* newStudent = malloc(sizeof(Student));
+            if (newStudent) {
+                newStudent->id = id;
+                strncpy(newStudent->name, b, sizeof(newStudent->name) - 1);
+                newStudent->name[sizeof(newStudent->name) - 1] = '\0';
+                newStudent->score = score;
+                newStudent->next = NULL;
+
+                if (*head == NULL) {
+                    *head = newStudent;
+                } else {
+                    Student* temp = *head;
+                    while (temp->next != NULL) {
+                        temp = temp->next;
+                    }
+                    temp->next = newStudent;
+                }
+                count++;
+            }
         }
     }
     fclose(fp);
