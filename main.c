@@ -29,12 +29,9 @@ char* globalfilename = NULL;
  *   - Loop until the user types "exit" or EOF.
  * --------------------------------------------------------------- */
  
-void run_shell(const char *csv_path) {
-    Student* head = NULL;
+void run_shell(Student** head) {
     char input[256];
     ShellResult result = SHELL_OK;
-    
-    loadStudent(csv_path, &head);
 
     #ifdef ADMIN_MODE
         const char* prompt = "admin> ";
@@ -47,11 +44,12 @@ void run_shell(const char *csv_path) {
         
         input[strcspn(input, "\n")] = 0;
         
-        if (strlen(input) > 0) {
-            result = process_command(input, &head);
-        }
+        char* first_ns = input;
+        while (*first_ns == ' ' || *first_ns == '\t') first_ns++;
+        if (*first_ns == '\0' || *first_ns == '#') continue;
+
+        result = process_command(input, head);
     }
-    freeStudents(head);
 }
 /* ---------------------------------------------------------------
  * TODO: Implement batch mode – read commands from a file.
@@ -59,29 +57,38 @@ void run_shell(const char *csv_path) {
  *   - Execute each line as a command (same logic as run_shell).
  *   - Close the file when done.
  * --------------------------------------------------------------- */
-void run_command_file(const char *cmd_file, const char *csv_path) {
+void run_command_file(const char *cmd_file, Student** head) {
     FILE* fp = fopen(cmd_file, "r");
     if (!fp) {
         perror("Error: could not open command file");
         return;
     }
-    Student* head = NULL;
-    loadStudent(csv_path, &head);   
 
     char input[256];
     int line_num = 1;
+    ShellResult result = SHELL_OK;
 
     while (fgets(input, sizeof(input), fp)) {
         input[strcspn(input, "\n")] = 0;
 
+        char* first_ns = input;
+        while (*first_ns == ' ' || *first_ns == '\t') first_ns++;
+        if (*first_ns == '\0' || *first_ns == '#') {
+            continue;
+        }
+
         printf("[command file:%d] %s\n", line_num++, input);
         
-        if (process_command(input, &head) == SHELL_EXIT) {
+        result = process_command(input, head);
+        if (result == SHELL_EXIT) {
             break;
         }
     }
     fclose(fp);
-    freeStudents(head);
+    
+    if (result != SHELL_EXIT) {
+        run_shell(head);
+    }
 }
 
 int main(int argc, char *argv[]) {
@@ -103,35 +110,37 @@ int main(int argc, char *argv[]) {
      *   }
      */
      for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-f") == 0 && i + 1 < argc) {
-            cmd_file = argv[++i];
+        if (strcmp(argv[i], "-f") == 0) {
+            if (i + 1 < argc) {
+                cmd_file = argv[++i];
+            } else {
+                printf("Error: -f requires a filename\n");
+                return 1;
+            }
         } else {
             csv_path = argv[i];
         }
     }
      globalfilename = (char*)csv_path;
 
+    Student* head = NULL;
+    loadStudent(csv_path, &head);
+
 #ifdef ADMIN_MODE
     /* Admin shell: supports add, delete, update, save, load, sort, list, find, help, exit */
     printf("[Admin Program]\n");
-    if (cmd_file) {
-        run_command_file(cmd_file, csv_path);
-    } else {
-        run_shell(csv_path);
-    }
-
 #elif defined(CLIENT_MODE)
     /* Client shell: supports find, list, help, exit  (read-only) */
     printf("[Client Program]\n");
-    if (cmd_file) {
-        run_command_file(cmd_file, csv_path);
-    } else {
-        run_shell(csv_path);
-    }
-
 #else
 #error "Define either -DADMIN_MODE or -DCLIENT_MODE when compiling."
 #endif
 
+    if (cmd_file) {
+        run_command_file(cmd_file, &head);
+    } else {
+        run_shell(&head);
+    }
+    freeStudents(head);
     return 0;
 }

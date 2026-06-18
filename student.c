@@ -72,6 +72,8 @@ void deleteStudent(Student** head, int id) {
     }
     while (temp != NULL) {
         if (temp -> id == id) {
+          
+          
             if (prev == NULL) *head = temp -> next;
             else prev->next = temp->next;
 

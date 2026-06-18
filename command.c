@@ -36,7 +36,79 @@ ShellResult handle_reload(char* args, Student** head) {
 }
 
 ShellResult handle_stats(char* args, Student** head) {
-    printf("Statistics displayed.\n");
+    if (*head == NULL) {
+        printf("No student data available\n");
+        return SHELL_OK;
+    }
+    int count = 0;
+    int max = -1;
+    int min = 101;
+    int sum = 0;
+    Student* temp = *head;
+    while (temp != NULL) {
+        count++;
+        if (temp->score > max) max = temp->score;
+        if (temp->score < min) min = temp->score;
+        sum += temp->score;
+        temp = temp->next;
+    }
+    printf("Count: %d\n", count);
+    printf("Average: %.1f\n", (float)sum / count);
+    printf("Max: %d\n", max);
+    printf("Min: %d\n", min);
+    return SHELL_OK;
+}
+
+ShellResult handle_sort(char* args, Student** head) {
+    char* key = strtok(NULL, " \t\n");
+    if (!key) {
+        printf("Error: missing sort key\n");
+        return SHELL_ERR_MISSING_ARGUMENT;
+    }
+    if (strcmp(key, "name") != 0 && strcmp(key, "score") != 0) {
+        printf("Error: invalid sort key\n");
+        return SHELL_OK;
+    }
+    if (*head == NULL || (*head)->next == NULL) {
+        printf("sorted by %s\n", key);
+        return SHELL_OK;
+    }
+    
+    int swapped;
+    Student *ptr1;
+    Student *lptr = NULL;
+    
+    do {
+        swapped = 0;
+        ptr1 = *head;
+        while (ptr1->next != lptr) {
+            int cmp = 0;
+            if (strcmp(key, "name") == 0) {
+                cmp = strcmp(ptr1->name, ptr1->next->name);
+            } else {
+                cmp = ptr1->score - ptr1->next->score;
+            }
+            if (cmp > 0) {
+                int temp_id = ptr1->id;
+                char temp_name[32];
+                strcpy(temp_name, ptr1->name);
+                int temp_score = ptr1->score;
+                
+                ptr1->id = ptr1->next->id;
+                strcpy(ptr1->name, ptr1->next->name);
+                ptr1->score = ptr1->next->score;
+                
+                ptr1->next->id = temp_id;
+                strcpy(ptr1->next->name, temp_name);
+                ptr1->next->score = temp_score;
+                swapped = 1;
+            }
+            ptr1 = ptr1->next;
+        }
+        lptr = ptr1;
+    } while (swapped);
+    
+    printf("sorted by %s\n", key);
     return SHELL_OK;
 }
 
@@ -110,6 +182,7 @@ Command commands[] = {
     {"find",   handle_find,   "find <id>",               "Find student"},
     {"list",   handle_list,   "list",                    "List students"},
     {"stats",  handle_stats,  "stats",                   "Show statistics"},
+    {"sort",   handle_sort,   "sort <name|score>",       "Sort students"},
     {"help",   handle_help,   "help",                    "Show help"},
     {"clear",  handle_clear,  "clear",                   "Clear screen"},
     {"exit",   handle_exit,   "exit",                    "Exit shell"}
@@ -122,6 +195,7 @@ Command commands[] = {
     {"find",   handle_find,   "find <id>",   "Find student"},
     {"list",   handle_list,   "list",        "List students"},
     {"stats",  handle_stats,  "stats",       "Show statistics"},
+    {"sort",   handle_sort,   "sort <name|score>", "Sort students"},
     {"help",   handle_help,   "help",        "Show help"},
     {"clear",  handle_clear,  "clear",       "Clear screen"},
     {"exit",   handle_exit,   "exit",        "Exit shell"}
